@@ -1800,8 +1800,21 @@ builtins.intersectAttrs super {
 
   kmonad = lib.pipe super.kmonad [
     enableSeparateBinOutput
+
     (overrideCabal (drv: {
-      passthru = lib.recursiveUpdate drv.passthru or { } { tests.nixos = pkgs.nixosTests.kmonad; };
+      passthru = lib.recursiveUpdate drv.passthru or { } {
+        tests.nixos = pkgs.nixosTests.kmonad;
+
+        darwinDriver = lib.optional stdenv.hostPlatform.isDarwin (
+          pkgs.karabiner-dk.overrideAttrs (attrs: {
+            version = "5.0.0";
+            src = fetchurl {
+              url = "https://github.com/pqrs-org/Karabiner-DriverKit-VirtualHIDDevice/releases/download/v5.0.0/Karabiner-DriverKit-VirtualHIDDevice-5.0.0.pkg";
+              sha256 = "1iwqz6wnw55mn5ynxlwknzxxna55ckx49fx4cmzkkdhxca1bda44";
+            };
+          })
+        );
+      };
     }))
   ];
 
